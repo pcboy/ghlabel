@@ -1,3 +1,35 @@
 #!/usr/bin/env ruby
+begin
+  Object.const_get('Ghlabel')
+rescue NameError
+  require 'bundler/setup'
+end
 
-gh = Ghlabel::Ghlabel.new(token: File.read('.github-token'), repo: 'vibe', organization: 'en-japan-air')
+require 'ghlabel'
+require 'trollop'
+
+opts = Trollop::options do
+  banner <<-EOS
+    ghlabel lets you add or remove labels from the current PR
+  EOS
+
+  opt :token_file, "File containing your github token (https://github.com/settings/tokens)", required: true, type: :string
+  opt :repository, "The repository you are working on", default: nil, type: :string
+  opt :organization, "Your organization name", default: nil, type: :string
+  opt :add, "--add label1,label2,label3", type: :string, default: nil
+  opt :remove, "--remove label1,label2,label3", type: :string, default: nil
+  opt :with_references, "Also apply labels to title referenced #issues_numbers", default: true
+end
+
+abort "You need at least --add or --remove" if opts[:add] && opts[:remove] or !opts[:add] && !opts[:remove]
+
+gh = Ghlabel::Ghlabel.new(token: File.read(opts[:token_file]), repo: opts[:repository],
+                          organization: opts[:organization], with_references: opts[:with_references])
+
+if opts[:remove]
+  labels = opts[:remove].split(',')
+  gh.remove_labels(labels)
+elsif opts[:add]
+  labels = opts[:add].split(',')
+  gh.add_labels(labels)
+end

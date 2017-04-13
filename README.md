@@ -1,8 +1,6 @@
 # Ghlabel
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/ghlabel`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+ghlabel lets you set/unset labels on the PR related to the current branch you are on.
 
 ## Installation
 
@@ -22,7 +20,29 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+```
+$> ghlabel -h
+  -t, --token-file=<s>                           File containing your github token (https://github.com/settings/tokens)
+	-r, --repository=<s>                           The repository you are working on
+	-o, --organization=<s>                         Your organization name
+  -a, --add=<s>                                  --add label1,label2,label3
+  -e, --remove=<s>                               --remove label1,label2,label3
+  -w, --with-references, --no-with-references    Also apply labels to title referenced #issues_numbers (default: true)
+  -h, --help                                     Show this message
+```
+
+Add QA,Review label to the current PR
+```
+ghlabel -t .github-token --add QA,Review
+```
+
+Remove QA,Review label to the current PR
+```
+ghlabel -t .github-token --remove QA,Review
+```
+
+If your PR contains some references to others issues with #issue\_number the corresponding issues will have their labels changed too.
+You can prevent that behavior by adding --no-with-references
 
 ## Development
 
@@ -37,5 +57,5 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/[USERN
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the WTFPL 
 
