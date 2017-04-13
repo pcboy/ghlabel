@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+
+gh = Ghlabel::Ghlabel.new(token: File.read('.github-token'), repo: 'vibe', organization: 'en-japan-air')
