@@ -1,9 +1,6 @@
 require "ghlabel/version"
 require 'github_api'
 require 'active_support/core_ext/object/try'
-require 'looksee'
-
-require 'awesome_print'
 
 module Ghlabel
   class Ghlabel
