@@ -11,11 +11,8 @@ module Ghlabel
       @token = token
       @user = github.users.get.login
 
-      if organization.nil? && organizations.count > 1
-        warn "You have more than one organization (#{organizations}), please choose one as parameter or we'll use your personal one"
-      end
-      @organization = organization || @user 
-      @repo = repo || current_repo
+      @organization = organization || current_repo_info[:organization] 
+      @repo = repo || current_repo_info[:repo]
       @with_references = with_references
 
       @pr = pr_number ? pr_from_num(pr_number) : pr_from_ref(File.read('.git/HEAD').gsub('ref: ', '').strip)
@@ -59,8 +56,9 @@ module Ghlabel
       pr_issue.labels.map(&:name)
     end
 
-    def current_repo
-      @_repo_info ||= (/url = git@github.com:.*\/(.*).git/.match(File.read('.git/config')).captures.try(:first))
+    def current_repo_info
+      organization, repo = (/url = git@github.com:(.*)\/(.*).git/.match(File.read('.git/config')).captures)
+      {organization: organization, repo: repo}
     end
 
     def organizations
