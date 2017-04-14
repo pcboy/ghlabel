@@ -18,13 +18,14 @@ opts = Trollop::options do
   opt :organization, "Your organization name", default: nil, type: :string
   opt :add, "--add label1,label2,label3", type: :string, default: nil
   opt :remove, "--remove label1,label2,label3", type: :string, default: nil
+  opt :pr_number, "specify pr number, don't autodetect pr", type: :string, default: nil
   opt :with_references, "Also apply labels to title referenced #issues_numbers", default: true
 end
 
 abort "You need at least --add or --remove" if opts[:add] && opts[:remove] or !opts[:add] && !opts[:remove]
 
 gh = Ghlabel::Ghlabel.new(token: File.read(opts[:token_file]), repo: opts[:repository],
-                          organization: opts[:organization], with_references: opts[:with_references])
+                          organization: opts[:organization], with_references: opts[:with_references], pr_number: opts[:pr_number])
 
 if opts[:remove]
   labels = opts[:remove].split(',')

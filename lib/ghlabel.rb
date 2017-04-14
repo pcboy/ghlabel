@@ -7,7 +7,7 @@ require 'awesome_print'
 
 module Ghlabel
   class Ghlabel
-    def initialize(token:, repo: nil, organization: nil, with_references: true)
+    def initialize(token:, repo: nil, organization: nil, with_references: true, pr_number: nil)
       @token = token
       @user = github.users.get.login
 
@@ -18,7 +18,7 @@ module Ghlabel
       @repo = repo || current_repo
       @with_references = with_references
 
-      @pr = pr_from_ref(File.read('.git/HEAD').gsub('ref: ', '').strip)
+      @pr = pr_number ? pr_from_num(pr_number) : pr_from_ref(File.read('.git/HEAD').gsub('ref: ', '').strip)
     end
 
     def remove_labels(labels)
@@ -40,8 +40,15 @@ module Ghlabel
     end
 
     private
+
+    def pr_from_num(pr_number)
+      pr = github.pull_requests.get(user: @organization, repo: @repo, number: pr_number)
+      {id: pr.id, ref: pr.head.ref, title: pr.title, created_at: pr.created_at, merged_at: pr.merged_at,
+       href: pr['_links']['self']['href'], issue_number: /\/(\d+)$/.match(pr['_links']['issue']['href']).captures.first}
+    end
+
     def pr_from_ref(ref)
-      prs = github.pull_requests.list(user: @organization, repo: @repo, state: 'open', auto_pagination: true)
+      prs = github.pull_requests.list(user: @organization, repo: @repo, state: 'all', auto_pagination: true)
         .map{|x| {id: x.id, ref: x.head.ref, title: x.title, created_at: x.created_at, merged_at: x.merged_at,
                   href: x['_links']['self']['href'], issue_number: /\/(\d+)$/.match(x['_links']['issue']['href']).captures.first }}
       prs.find{|x| x[:ref] == ref.gsub('refs/heads/', '')}
