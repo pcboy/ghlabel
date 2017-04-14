@@ -42,10 +42,15 @@ module Ghlabel
     end
 
     def pr_from_ref(ref)
-      prs = github.pull_requests.list(user: @organization, repo: @repo, state: 'all', auto_pagination: true)
-        .map{|x| {id: x.id, ref: x.head.ref, title: x.title, created_at: x.created_at, merged_at: x.merged_at,
-                  href: x['_links']['self']['href'], issue_number: /\/(\d+)$/.match(x['_links']['issue']['href']).captures.first }}
-      prs.find{|x| x[:ref] == ref.gsub('refs/heads/', '')}
+      clean_ref = ref.gsub('refs/heads/', '')
+      pr = github.pull_requests.list(user: @organization, repo: @repo, state: 'all').each_page do |page|
+        if pr = page.find{|x| x.head.ref == clean_ref}
+          break pr
+        end
+      end
+      fail "Can't find your pr" unless pr
+      {id: pr.id, ref: pr.head.ref, title: pr.title, created_at: pr.created_at, merged_at: pr.merged_at,
+       href: pr['_links']['self']['href'], issue_number: /\/(\d+)$/.match(pr['_links']['issue']['href']).captures.first }
     end
 
     def current_labels(issue_number)
